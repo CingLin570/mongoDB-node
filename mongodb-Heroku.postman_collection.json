@@ -1,0 +1,141 @@
+{
+	"info": {
+		"_postman_id": "1018499d-f8a8-4d89-a24b-e27b3d5ee000",
+		"name": "mongodb-Heroku",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "取得全部貼文",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://cryptic-hollows-68088.herokuapp.com/posts",
+					"protocol": "https",
+					"host": [
+						"cryptic-hollows-68088",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "新增貼文",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"霸氣一哥\",\r\n    \"content\": \"今天天氣真好\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://cryptic-hollows-68088.herokuapp.com/posts",
+					"protocol": "https",
+					"host": [
+						"cryptic-hollows-68088",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "刪除全部貼文",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://cryptic-hollows-68088.herokuapp.com/posts",
+					"protocol": "https",
+					"host": [
+						"cryptic-hollows-68088",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "刪除單筆貼文",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://cryptic-hollows-68088.herokuapp.com/posts/62628ddf32ddc1d2964ef52f",
+					"protocol": "https",
+					"host": [
+						"cryptic-hollows-68088",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts",
+						"62628ddf32ddc1d2964ef52f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "編輯單筆貼文",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\": \"今天天氣真好\",\r\n    \"likes\": 222\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://cryptic-hollows-68088.herokuapp.com/posts/62628ddf32ddc1d2964ef52f",
+					"protocol": "https",
+					"host": [
+						"cryptic-hollows-68088",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"posts",
+						"62628ddf32ddc1d2964ef52f"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
