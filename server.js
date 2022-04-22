@@ -1,9 +1,9 @@
 const http = require("http");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const Room = require("./models/rooms");
+const Post = require("./models/posts");
 const headers = require("./headers");
-const errorHandle = require("./errorHandle");
+const errorHandle = require("./responseHandle");
 
 dotenv.config({ path: "./config.env" });
 const DB = process.env.DATABASE.replace(
@@ -25,86 +25,92 @@ const requestListener = async (req, res) => {
   req.on("data", (chunk) => {
     body += chunk;
   });
-  if (req.url === "/rooms" && req.method === "GET") {
-    const room = await Room.find();
+  if (req.url === "/posts" && req.method === "GET") {
+    const post = await Post.find();
     res.writeHead(200, headers);
     res.write(
       JSON.stringify({
         status: "success",
-        room,
+        post,
       })
     );
     res.end();
-  } else if (req.url === "/rooms" && req.method === "POST") {
+  } else if (req.url === "/posts" && req.method === "POST") {
     req.on("end", async () => {
       try {
         const data = JSON.parse(body);
-        const newRoom = await Room.create({
-          name: data.name,
-          price: data.price,
-          rating: data.rating,
-        });
-        res.writeHead(200, headers);
-        res.write(
-          JSON.stringify({
-            status: "success",
-            room: newRoom,
-          })
-        );
-        res.end();
+        if(data.content !== undefined) {
+          let {name, content, image, likes } = data;
+          const newPost = await Post.create({
+            name,
+            content,
+            image,
+            likes,
+          });
+          res.writeHead(200, headers);
+          res.write(
+            JSON.stringify({
+              status: "success",
+              post: newPost,
+            })
+          );
+          res.end();
+        } else {
+          errorHandle(res, 400, "欄位沒有正確，或沒有此 ID");
+        }
       } catch (error) {
-        errorHandle(res, "欄位沒有正確，或沒有此 ID");
+        errorHandle(res, 400, 400, "欄位沒有正確，或沒有此 ID");
       }
     });
-  } else if (req.url === "/rooms" && req.method === "DELETE") {
-    await Room.deleteMany({});
-    const roomCount = await Room.find();
+  } else if (req.url === "/posts" && req.method === "DELETE") {
+    await Post.deleteMany({});
+    const postCount = await Post.find();
     res.writeHead(200, headers);
     res.write(
       JSON.stringify({
         status: "success",
-        room: roomCount,
+        post: postCount,
       })
     );
     res.end();
-  } else if (req.url.startsWith("/rooms/") && req.method === "DELETE") {
+  } else if (req.url.startsWith("/posts/") && req.method === "DELETE") {
     try {
       const id = req.url.split("/").pop();
-      const room = await Room.findByIdAndDelete(id);
+      const post = await Post.findByIdAndDelete(id);
       res.writeHead(200, headers);
       res.write(
         JSON.stringify({
           status: "success",
-          room,
+          post,
         })
       );
       res.end();
     } catch (error) {
-      errorHandle(res, "欄位沒有正確，或沒有此 ID");
+      errorHandle(res, 400, "欄位沒有正確，或沒有此 ID");
     }
-  } else if (req.url.startsWith("/rooms/") && req.method === "PATCH") {
+  } else if (req.url.startsWith("/posts/") && req.method === "PATCH") {
     req.on("end", async () => {
       try {
         const id = req.url.split("/").pop();
         const name = JSON.parse(body).name;
         if (name !== undefined) {
-          await Room.findByIdAndUpdate(id, {
+          await Post.findByIdAndUpdate(id, {
             name: name,
           });
-          const room = await Room.findById(id);
+          const post = await Post.findById(id);
           res.writeHead(200, headers);
           res.write(
             JSON.stringify({
               status: "success",
-              room,
+              post,
             })
           );
           res.end();
         } else {
-          errorHandle(res, "欄位沒有正確，或沒有此 ID");
+          errorHandle(res, 400, "欄位沒有正確，或沒有此 ID");
         }
       } catch (error) {
-        errorHandle(res, "欄位沒有正確，或沒有此 ID");
+        errorHandle(res, 400, "欄位沒有正確，或沒有此 ID");
       }
     });
   }
