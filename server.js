@@ -1,11 +1,10 @@
 const http = require("http");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const Room = require("./models/rooms");
-const headers = require("./headers");
-const errorHandle = require("./errorHandle");
+const Post = require("./models/posts");
+const { successHandle, errorHandle } = require("./utils/responseHandle");
 
-dotenv.config({ path: "./config.env" });
+dotenv.config({ path: "./.env" });
 const DB = process.env.DATABASE.replace(
   "<password>",
   process.env.DATABASE_PASSWORD
@@ -25,88 +24,74 @@ const requestListener = async (req, res) => {
   req.on("data", (chunk) => {
     body += chunk;
   });
-  if (req.url === "/rooms" && req.method === "GET") {
-    const room = await Room.find();
-    res.writeHead(200, headers);
-    res.write(
-      JSON.stringify({
-        status: "success",
-        room,
-      })
-    );
-    res.end();
-  } else if (req.url === "/rooms" && req.method === "POST") {
+  if (req.url === "/posts" && req.method === "GET") {
+    const post = await Post.find();
+    successHandle(res, 200, post);
+  } else if (req.url === "/posts" && req.method === "POST") {
     req.on("end", async () => {
       try {
         const data = JSON.parse(body);
-        const newRoom = await Room.create({
-          name: data.name,
-          price: data.price,
-          rating: data.rating,
-        });
-        res.writeHead(200, headers);
-        res.write(
-          JSON.stringify({
-            status: "success",
-            room: newRoom,
-          })
-        );
-        res.end();
+        if(data.content !== "") {
+          let { name, content, image, likes } = data;
+          const newPost = await Post.create({
+            name,
+            content,
+            image,
+            likes,
+          });
+          successHandle(res, 200, newPost);
+        } else {
+          errorHandle(res, 400, "content欄位尚未填寫");
+        }
       } catch (error) {
-        errorHandle(res, "欄位沒有正確，或沒有此 ID");
+        errorHandle(res, 400, "欄位沒有正確");
       }
     });
-  } else if (req.url === "/rooms" && req.method === "DELETE") {
-    await Room.deleteMany({});
-    const roomCount = await Room.find();
-    res.writeHead(200, headers);
-    res.write(
-      JSON.stringify({
-        status: "success",
-        room: roomCount,
-      })
-    );
-    res.end();
-  } else if (req.url.startsWith("/rooms/") && req.method === "DELETE") {
+  } else if (req.url === "/posts" && req.method === "DELETE") {
+    const post = await Post.deleteMany({});
+    successHandle(res, 200, post);
+  } else if (req.url.startsWith("/posts/") && req.method === "DELETE") {
     try {
       const id = req.url.split("/").pop();
-      const room = await Room.findByIdAndDelete(id);
-      res.writeHead(200, headers);
-      res.write(
-        JSON.stringify({
-          status: "success",
-          room,
-        })
-      );
-      res.end();
+      const post = await Post.findByIdAndDelete(id);
+      if(post !== null) {
+        successHandle(res, 200, post);
+      } else {
+        errorHandle(res, 400, "此id不存在");
+      }
     } catch (error) {
-      errorHandle(res, "欄位沒有正確，或沒有此 ID");
+      errorHandle(res, 400, "欄位沒有正確，或無此ID");
     }
-  } else if (req.url.startsWith("/rooms/") && req.method === "PATCH") {
+  } else if (req.url.startsWith("/posts/") && req.method === "PATCH") {
     req.on("end", async () => {
       try {
         const id = req.url.split("/").pop();
-        const name = JSON.parse(body).name;
-        if (name !== undefined) {
-          await Room.findByIdAndUpdate(id, {
-            name: name,
+        const data = JSON.parse(body);
+        if (data.content !== "") {
+          let { content, image, likes } = data;
+          const post = await Post.findByIdAndUpdate(id, {
+            $set: {
+              content,
+              image,
+              likes,
+            }
           });
-          const room = await Room.findById(id);
-          res.writeHead(200, headers);
-          res.write(
-            JSON.stringify({
-              status: "success",
-              room,
-            })
-          );
-          res.end();
+          if(post !== null) {
+            successHandle(res, 200, post);
+          } else {
+            errorHandle(res, 400, "此id不存在");
+          }
         } else {
-          errorHandle(res, "欄位沒有正確，或沒有此 ID");
+          errorHandle(res, 400, "content欄位不能為空值");
         }
       } catch (error) {
-        errorHandle(res, "欄位沒有正確，或沒有此 ID");
+        errorHandle(res, 400, "欄位沒有正確");
       }
     });
+  } else if (req.url === "/posts" && req.method === "OPTIONS") {
+    successHandle(res, 200, "OPTIONS");
+  } else {
+    errorHandle(res, 404, "無此網頁路由");
   }
 };
 
