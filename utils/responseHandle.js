@@ -1,5 +1,5 @@
 const headers = require("./headers");
-function errorHandle(res, status, data) {
+const errorHandle = (res, status, data) => {
   res.writeHead(400,status ,headers);
   res.write(
     JSON.stringify({
@@ -10,7 +10,7 @@ function errorHandle(res, status, data) {
   );
   res.end();
 }
-function successHandle(res, status, data) {
+const successHandle = (res, status, data) => {
   res.writeHead(status, headers);
   res.write(
     JSON.stringify({
