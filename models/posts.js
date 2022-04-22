@@ -3,7 +3,6 @@ const postSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      unique: true,
       required: [true, "貼文姓名未填寫"]
     },
     content: {
